@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import IdeaCard from "@/components/IdeaCard";
 import IdeaForm from "@/components/IdeaForm";
 
+const PAGE_SIZE = 4;
+
 export default function Home() {
   const [ideas, setIdeas] = useState([]);
   const [search, setSearch] = useState("");
-  const [mounted, setMounted] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const fetchIdeas = async () => {
     try {
@@ -23,14 +25,20 @@ export default function Home() {
 
   useEffect(() => {
     fetchIdeas();
-    setMounted(true);
   }, []);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search]);
 
   const filteredIdeas = ideas.filter(
     (idea) =>
       idea.title.toLowerCase().includes(search.toLowerCase()) ||
       idea.author.toLowerCase().includes(search.toLowerCase())
   );
+
+  const visibleIdeas = filteredIdeas.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredIdeas.length;
 
   return (
     <>
@@ -70,7 +78,6 @@ export default function Home() {
           overflow-x: hidden;
         }
 
-        /* Decorative background blobs */
         .page-root::before {
           content: '';
           position: fixed;
@@ -94,7 +101,6 @@ export default function Home() {
           z-index: 0;
         }
 
-        /* HEADER */
         .header {
           position: sticky;
           top: 0;
@@ -115,11 +121,7 @@ export default function Home() {
           justify-content: space-between;
         }
 
-        .logo {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
+        .logo { display: flex; align-items: center; gap: 12px; }
 
         .logo-icon {
           width: 40px;
@@ -152,7 +154,6 @@ export default function Home() {
           border: 1px solid rgba(124,58,237,0.15);
         }
 
-        /* MAIN CONTENT */
         .content {
           max-width: 960px;
           margin: 0 auto;
@@ -161,7 +162,6 @@ export default function Home() {
           z-index: 1;
         }
 
-        /* HERO SECTION */
         .hero {
           text-align: center;
           margin-bottom: 48px;
@@ -212,16 +212,13 @@ export default function Home() {
           line-height: 1.6;
         }
 
-        /* SEARCH */
         .search-wrap {
           margin-bottom: 40px;
           opacity: 0;
           animation: fadeUp 0.6s ease 0.1s forwards;
         }
 
-        .search-inner {
-          position: relative;
-        }
+        .search-inner { position: relative; }
 
         .search-icon {
           position: absolute;
@@ -254,7 +251,6 @@ export default function Home() {
           box-shadow: 0 0 0 4px rgba(124,58,237,0.08), var(--shadow-sm);
         }
 
-        /* TWO-COLUMN LAYOUT */
         .two-col {
           display: grid;
           grid-template-columns: 1fr 1.4fr;
@@ -266,7 +262,6 @@ export default function Home() {
           .two-col { grid-template-columns: 1fr; }
         }
 
-        /* FORM CARD */
         .form-card {
           background: #fff;
           border: 1.5px solid var(--border);
@@ -302,7 +297,6 @@ export default function Home() {
           color: var(--ink);
         }
 
-        /* IDEAS PANEL */
         .ideas-panel {
           opacity: 0;
           animation: fadeUp 0.6s ease 0.3s forwards;
@@ -315,11 +309,7 @@ export default function Home() {
           margin-bottom: 20px;
         }
 
-        .trending-label {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
+        .trending-label { display: flex; align-items: center; gap: 10px; }
 
         .trending-label h2 {
           font-family: 'Syne', sans-serif;
@@ -353,21 +343,51 @@ export default function Home() {
           color: var(--ink-muted);
         }
 
-        .empty-icon {
-          font-size: 36px;
-          margin-bottom: 12px;
-          display: block;
+        .empty-icon { font-size: 36px; margin-bottom: 12px; display: block; }
+
+        .empty-state p { font-size: 15px; font-weight: 400; }
+
+        /* LOAD MORE */
+        .load-more-wrap {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          margin-top: 20px;
         }
 
-        .empty-state p {
-          font-size: 15px;
+        .load-more-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: #fff;
+          color: var(--violet);
+          border: 1.5px solid rgba(124,58,237,0.25);
+          border-radius: 12px;
+          padding: 12px 28px;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 8px rgba(124,58,237,0.08);
+        }
+
+        .load-more-btn:hover {
+          background: var(--violet-light);
+          border-color: rgba(124,58,237,0.4);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 16px rgba(124,58,237,0.15);
+        }
+
+        .load-more-btn:active { transform: translateY(0); }
+
+        .showing-count {
+          font-size: 12px;
+          color: var(--ink-muted);
           font-weight: 400;
         }
 
-        /* Override IdeaCard & IdeaForm via global class additions */
-        /* These are applied via a wrapper div injected around each component */
-
-        /* ANIMATIONS */
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(16px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -375,7 +395,6 @@ export default function Home() {
       `}</style>
 
       <main className="page-root">
-        {/* HEADER */}
         <header className="header">
           <div className="header-inner">
             <div className="logo">
@@ -387,14 +406,12 @@ export default function Home() {
         </header>
 
         <div className="content">
-          {/* HERO */}
           <div className="hero">
             <div className="hero-tag">✦ Community Ideas Board</div>
             <h1>Where Great Ideas<br /><span className="accent">Come Alive</span></h1>
             <p>Share your boldest ideas, discover what others are building, and spark the next big thing.</p>
           </div>
 
-          {/* SEARCH */}
           <div className="search-wrap">
             <div className="search-inner">
               <span className="search-icon">🔍</span>
@@ -408,9 +425,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* TWO-COLUMN */}
           <div className="two-col">
-            {/* FORM */}
             <div className="form-card">
               <div className="section-label">
                 <div className="section-label-dot" />
@@ -419,7 +434,6 @@ export default function Home() {
               <IdeaForm refresh={fetchIdeas} />
             </div>
 
-            {/* IDEAS LIST */}
             <div className="ideas-panel">
               <div className="trending-header">
                 <div className="trending-label">
@@ -435,11 +449,27 @@ export default function Home() {
                   <p>No ideas yet — be the first to share one!</p>
                 </div>
               ) : (
-                <div className="ideas-grid">
-                  {filteredIdeas.map((idea) => (
-                    <IdeaCard key={idea._id} idea={idea} refresh={fetchIdeas} />
-                  ))}
-                </div>
+                <>
+                  <div className="ideas-grid">
+                    {visibleIdeas.map((idea) => (
+                      <IdeaCard key={idea._id} idea={idea} refresh={fetchIdeas} />
+                    ))}
+                  </div>
+
+                  <div className="load-more-wrap">
+                    {hasMore && (
+                      <button
+                        className="load-more-btn"
+                        onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+                      >
+                        ✦ Load More Ideas
+                      </button>
+                    )}
+                    <span className="showing-count">
+                      Showing {visibleIdeas.length} of {filteredIdeas.length} ideas
+                    </span>
+                  </div>
+                </>
               )}
             </div>
           </div>

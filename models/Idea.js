@@ -17,11 +17,6 @@ const IdeaSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+}, { timestamps: true });
 
-export default mongoose.models.Idea ||
-  mongoose.model("Idea", IdeaSchema);
+export default mongoose.models.Idea || mongoose.model("Idea", IdeaSchema);

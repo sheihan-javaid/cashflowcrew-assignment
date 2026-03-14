@@ -3,13 +3,21 @@
 export default function IdeaCard({ idea, refresh }) {
 
   const upvote = async () => {
-    await fetch(`/api/ideas/${idea._id}/upvote`, { method: "POST" });
-    refresh();
+    try {
+      await fetch(`/api/ideas?id=${idea._id}`, { method: "PATCH" });
+      refresh();
+    } catch (err) {
+      console.error("Upvote error:", err);
+    }
   };
 
   const remove = async () => {
-    await fetch(`/api/ideas/${idea._id}`, { method: "DELETE" });
-    refresh();
+    try {
+      await fetch(`/api/ideas?id=${idea._id}`, { method: "DELETE" });
+      refresh();
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
   };
 
   return (
@@ -113,7 +121,7 @@ export default function IdeaCard({ idea, refresh }) {
         <p className="idea-card-desc">{idea.description}</p>
         <div className="idea-card-footer">
           <button onClick={upvote} className="btn-upvote">
-            👍 {idea.votes}
+            👍 {idea.upvotes ?? 0}
           </button>
           <button onClick={remove} className="btn-delete">
             Delete
